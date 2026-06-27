@@ -1,0 +1,35 @@
+{
+  "name": "@moy/web",
+  "version": "1.0.0",
+  "private": true,
+  "description": "MOY Web 前端（Next.js App Router）",
+  "type": "module",
+  "scripts": {
+    "dev": "next dev -p ${WEB_PORT:-3000}",
+    "build": "next build",
+    "start": "next start -p ${WEB_PORT:-3000}",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run --passWithNoTests",
+    "test:unit": "vitest run --passWithNoTests",
+    "test:e2e": "echo \"@moy/web: e2e 待启用 Playwright\" && exit 0"
+  },
+  "dependencies": {
+    "@moy/shared": "workspace:*",
+    "@moy/ui": "workspace:*",
+    "next": "^14.2.15",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@moy/config": "workspace:*",
+    "@types/node": "^20.16.0",
+    "@types/react": "^18.3.11",
+    "@types/react-dom": "^18.3.0",
+    "eslint": "^9.12.0",
+    "eslint-config-next": "^14.2.15",
+    "typescript": "^5.6.2",
+    "vitest": "^2.1.2"
+  }
+}

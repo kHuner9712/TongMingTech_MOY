@@ -1,0 +1,42 @@
+# =============================================================================
+# MOY 本地开发依赖服务
+# 仅用于本地开发与测试，非生产部署配置。
+# 启动：pnpm docker:up  停止：pnpm docker:down
+# =============================================================================
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: moy-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-moy}
+      POSTGRES_USER: ${POSTGRES_USER:-moy}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-moy_dev_password}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-moy} -d ${POSTGRES_DB:-moy}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: moy-redis
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:
+  redis_data:

@@ -1,0 +1,43 @@
+{
+  "name": "@moy/api",
+  "version": "1.0.0",
+  "private": true,
+  "description": "MOY API 服务（Fastify + Prisma）",
+  "type": "module",
+  "main": "./dist/index.js",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc -p tsconfig.build.json",
+    "start": "node dist/index.js",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:unit": "vitest run",
+    "test:watch": "vitest",
+    "prisma:generate": "dotenv -e ../../.env -- prisma generate --schema prisma/schema.prisma",
+    "prisma:validate": "dotenv -e ../../.env -- prisma validate --schema prisma/schema.prisma",
+    "prisma:migrate:dev": "dotenv -e ../../.env -- prisma migrate dev --schema prisma/schema.prisma",
+    "prisma:studio": "dotenv -e ../../.env -- prisma studio --schema prisma/schema.prisma"
+  },
+  "dependencies": {
+    "@fastify/under-pressure": "^9.0.2",
+    "@moy/shared": "workspace:*",
+    "@prisma/client": "^5.22.0",
+    "bullmq": "^5.21.0",
+    "fastify": "^5.0.0",
+    "ioredis": "^5.4.1",
+    "pino": "^9.5.0",
+    "pino-pretty": "^11.3.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@moy/config": "workspace:*",
+    "@types/node": "^20.16.0",
+    "eslint": "^9.12.0",
+    "prisma": "^5.22.0",
+    "tsx": "^4.19.1",
+    "typescript": "^5.6.2",
+    "vitest": "^2.1.2"
+  }
+}

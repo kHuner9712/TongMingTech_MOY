@@ -1,0 +1,39 @@
+{
+  "name": "moy",
+  "version": "1.0.0",
+  "private": true,
+  "description": "MOY (Mate Of You) - 桐鸣科技 B 端 AI 增长操作系统。1.0 正式商业版以 GEO（生成式引擎优化）为第一切入口。",
+  "license": "UNLICENSED",
+  "packageManager": "pnpm@9.12.0",
+  "engines": {
+    "node": ">=20.10.0",
+    "pnpm": ">=9.0.0"
+  },
+  "scripts": {
+    "build": "pnpm -r --filter=./packages/* build && pnpm -r --filter=./apps/* build",
+    "dev": "pnpm -r --parallel --filter=./apps/* dev",
+    "dev:api": "pnpm --filter @moy/api dev",
+    "dev:web": "pnpm --filter @moy/web dev",
+    "lint": "pnpm -r lint",
+    "lint:fix": "pnpm -r lint:fix",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md,yml,yaml}\" --ignore-path .gitignore",
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md,yml,yaml}\" --ignore-path .gitignore",
+    "typecheck": "pnpm -r typecheck",
+    "test": "pnpm -r test",
+    "test:unit": "pnpm -r test:unit",
+    "test:e2e": "pnpm -r test:e2e",
+    "prisma:generate": "pnpm --filter @moy/api prisma:generate",
+    "prisma:validate": "pnpm --filter @moy/api prisma:validate",
+    "prisma:migrate:dev": "pnpm --filter @moy/api prisma:migrate:dev",
+    "docker:up": "docker compose up -d",
+    "docker:down": "docker compose down",
+    "clean": "pnpm -r exec rimraf node_modules dist .turbo coverage && rimraf node_modules",
+    "ci": "pnpm install --frozen-lockfile && pnpm lint && pnpm typecheck && pnpm test:unit && pnpm build"
+  },
+  "devDependencies": {
+    "dotenv-cli": "^7.4.2",
+    "prettier": "^3.3.3",
+    "rimraf": "^6.0.1",
+    "typescript": "^5.6.2"
+  }
+}

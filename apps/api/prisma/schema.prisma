@@ -1,0 +1,147 @@
+// =============================================================================
+// MOY Prisma Schema —— 阶段 0 基线
+//
+// 设计原则：
+// 1. 多租户隔离：所有租户资源表都带 tenantId，并通过唯一索引约束。
+// 2. 软删除：核心业务表使用 deletedAt 标记，便于审计与恢复。
+// 3. 审计字段：createdAt / updatedAt 由 Prisma 自动维护。
+// 4. 本阶段仅落地企业级后台基线（Tenant / User / Role / AuditLog）。
+//    GEO / Agent / 内容资产等领域表将在阶段 1 起按 docs/DATABASE_PLAN.md 落地。
+// =============================================================================
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../node_modules/.prisma/client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// -----------------------------------------------------------------------------
+// 租户
+// -----------------------------------------------------------------------------
+model Tenant {
+  id        String   @id @default(cuid())
+  name      String
+  slug      String   @unique
+  status    TenantStatus @default(ACTIVE)
+  plan      String   @default("starter")
+  metadata  Json?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deletedAt DateTime?
+
+  users     User[]
+
+  @@index([status])
+}
+
+enum TenantStatus {
+  ACTIVE
+  SUSPENDED
+  TERMINATED
+}
+
+// -----------------------------------------------------------------------------
+// 用户与角色
+// -----------------------------------------------------------------------------
+model User {
+  id            String     @id @default(cuid())
+  tenantId      String?
+  email         String
+  passwordHash  String
+  name          String
+  status        UserStatus @default(ACTIVE)
+  lastLoginAt   DateTime?
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+  deletedAt     DateTime?
+
+  tenant        Tenant?    @relation(fields: [tenantId], references: [id])
+  roles         UserRole[]
+  refreshTokens RefreshToken[]
+  auditLogs     AuditLog[]
+
+  @@unique([tenantId, email])
+  @@index([email])
+  @@index([status])
+}
+
+enum UserStatus {
+  ACTIVE
+  DISABLED
+  PENDING_INVITE
+}
+
+model UserRole {
+  id      String @id @default(cuid())
+  userId  String
+  role    String
+  scope   RoleScope
+  createdAt DateTime @default(now())
+
+  user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, role, scope])
+  @@index([userId])
+}
+
+enum RoleScope {
+  SYSTEM
+  TENANT
+}
+
+// -----------------------------------------------------------------------------
+// 鉴权令牌
+// -----------------------------------------------------------------------------
+model RefreshToken {
+  id        String   @id @default(cuid())
+  userId    String
+  tokenHash String   @unique
+  expiresAt DateTime
+  revokedAt DateTime?
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+// -----------------------------------------------------------------------------
+// 审计日志
+// -----------------------------------------------------------------------------
+model AuditLog {
+  id          String   @id @default(cuid())
+  tenantId    String?
+  userId      String?
+  action      String
+  resource    String
+  resourceId  String?
+  method      String?
+  path        String?
+  ip          String?
+  userAgent   String?
+  statusCode  Int?
+  durationMs  Int?
+  result      AuditResult @default(SUCCESS)
+  details     Json?
+  errorMessage String?
+  requestId   String?
+  createdAt   DateTime @default(now())
+
+  user        User?    @relation(fields: [userId], references: [id])
+
+  @@index([tenantId, createdAt])
+  @@index([userId, createdAt])
+  @@index([action, createdAt])
+  @@index([requestId])
+}
+
+enum AuditResult {
+  SUCCESS
+  FAILURE
+  DENIED
+}
